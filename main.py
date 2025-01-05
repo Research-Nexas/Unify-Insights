@@ -2,49 +2,64 @@ import pandas as pd
 from preprocessing import DataPreprocessor
 from models import ProfileAnalyzer, SemanticMatcher, PersonalizedRecommender
 from api import app
+import os
 
 def load_data():
-    # Load your data here (this is just an example)
-    papers = pd.read_csv('data/raw/papers.csv')
-    profiles = pd.read_csv('data/raw/user_profiles.csv')
-    return papers, profiles
+    try:
+        papers = pd.read_csv('data/raw/papers.csv')
+        profiles = pd.read_csv('data/raw/user_profiles.csv')
+        return papers, profiles
+    except FileNotFoundError as e:
+        raise RuntimeError("Required data files are missing. Ensure 'papers.csv' and 'user_profiles.csv' are in 'data/raw/'.") from e
+    except pd.errors.EmptyDataError as e:
+        raise RuntimeError("Data files are empty or corrupted.") from e
 
 def preprocess_data(papers, profiles):
-    preprocessor = DataPreprocessor()
-    processed_papers = preprocessor.process_papers(papers)
-    processed_profiles = preprocessor.process_profiles(profiles)
-    return processed_papers, processed_profiles
+    try:
+        preprocessor = DataPreprocessor()
+        processed_papers = preprocessor.process_papers(papers)
+        processed_profiles = preprocessor.process_profiles(profiles)
+        return processed_papers, processed_profiles
+    except Exception as e:
+        raise RuntimeError("Error occurred during data preprocessing.") from e
 
 def initialize_models():
-    profile_analyzer = ProfileAnalyzer()
-    semantic_matcher = SemanticMatcher()
-    recommender = PersonalizedRecommender()
-    return profile_analyzer, semantic_matcher, recommender
+    try:
+        profile_analyzer = ProfileAnalyzer()
+        semantic_matcher = SemanticMatcher()
+        recommender = PersonalizedRecommender()
+        return profile_analyzer, semantic_matcher, recommender
+    except Exception as e:
+        raise RuntimeError("Error initializing models.") from e
+
+def save_processed_data(data, file_path):
+    try:
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        data.to_csv(file_path, index=False)
+    except Exception as e:
+        raise RuntimeError(f"Error saving data to {file_path}.") from e
 
 def main():
-    # Load and preprocess data
-    papers, profiles = load_data()
-    processed_papers, processed_profiles = preprocess_data(papers, profiles)
+    try:
+        papers, profiles = load_data()
+        processed_papers, processed_profiles = preprocess_data(papers, profiles)
+        profile_analyzer, semantic_matcher, recommender = initialize_models()
 
-    # Initialize models
-    profile_analyzer, semantic_matcher, recommender = initialize_models()
+        if 'embeddings' not in processed_papers.columns:
+            paper_embeddings = semantic_matcher.compute_embeddings(processed_papers['processed_text'])
+            processed_papers['embeddings'] = paper_embeddings.tolist()
+        
+        if 'embeddings' not in processed_profiles.columns:
+            profile_embeddings = semantic_matcher.compute_embeddings(processed_profiles['processed_interests'])
+            processed_profiles['embeddings'] = profile_embeddings.tolist()
 
-    # Compute embeddings for papers and profiles
-    paper_embeddings = semantic_matcher.compute_embeddings(processed_papers['processed_text'])
-    profile_embeddings = semantic_matcher.compute_embeddings(processed_profiles['processed_interests'])
+        save_processed_data(processed_papers, 'data/processed/processed_papers.csv')
+        save_processed_data(processed_profiles, 'data/processed/processed_profiles.csv')
 
-    # Add embeddings to the dataframes
-    processed_papers['embeddings'] = paper_embeddings.tolist()
-    processed_profiles['embeddings'] = profile_embeddings.tolist()
-
-    # Save processed data
-    processed_papers.to_csv('data/processed/processed_papers.csv', index=False)
-    processed_profiles.to_csv('data/processed/processed_profiles.csv', index=False)
-
-    print("Data preprocessing and model initialization complete.")
-
-    # Run the Flask app
-    app.run(debug=True)
+        print("Data preprocessing and model initialization complete.")
+        app.run(debug=True)
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
 
 if __name__ == '__main__':
     main()
