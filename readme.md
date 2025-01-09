@@ -246,5 +246,7 @@ pytest --cov=. tests/
 
 ---
 
-This README serves as both documentation and a project overview, making it easier for users and contributors to understand and use your system.
+<h3>Project Contributers: <h3>
+<a href="https://github.com/Harshdev098/Nexas-Insights/graphs/contributors">
+<img src="https://contributors-img.web.app/image?repo=Harshdev098/Nexas-Insights"/>
 
