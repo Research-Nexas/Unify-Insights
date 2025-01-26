@@ -79,7 +79,7 @@ paper-matching-system/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Harshdev098/Nexas-Insights.git
+   git clone https://github.com/yourusername/Nexas-Insights.git
    cd Nexas-Insights
    ```
 
