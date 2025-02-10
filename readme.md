@@ -79,14 +79,19 @@ paper-matching-system/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/paper-matching-system.git
-   cd paper-matching-system
+   git clone https://github.com/yourusername/Nexas-Insights.git
+   cd Nexas-Insights
    ```
 
 2. Create and activate a virtual environment:
    ```bash
+   # On Unix or MacOS
    python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   source venv/bin/activate
+   
+   # On Windows
+   python -m venv venv
+   .\venv\Scripts\activate
    ```
 
 3. Install dependencies:
@@ -94,7 +99,7 @@ paper-matching-system/
    pip install -r requirements.txt
    ```
 
-4. Generate sample data:
+4. Generate sample data (if needed):
    ```bash
    python data_generator.py
    ```
@@ -249,4 +254,3 @@ pytest --cov=. tests/
 <h3>Project Contributers: <h3>
 <a href="https://github.com/Harshdev098/Nexas-Insights/graphs/contributors">
 <img src="https://contributors-img.web.app/image?repo=Harshdev098/Nexas-Insights"/>
-
